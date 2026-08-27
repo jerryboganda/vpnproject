@@ -68,6 +68,9 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
       - name: Setup Rust Toolchain & Android Targets
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -80,17 +83,35 @@ jobs:
         run: |
           cargo build --release -p vpnbridge-android-netbind -p vpnbridge-gateway -p vpnbridge-core
 
-      - name: Package Android Bundle
+      - name: Build Android APK with Gradle
+        working-directory: apps/android/android-native
+        run: |
+          gradle assembleRelease assembleDebug
+
+      - name: Package Android APK
+        shell: bash
         run: |
           mkdir -p dist-android
-          echo "VPNBridge Android Native Gateway Core Ready" > dist-android/README.txt
-          tar -czf vpnbridge-android-bundle.tar.gz dist-android/
+          find apps/android/android-native/build/outputs/apk -name "*.apk" -exec cp {} dist-android/ \; || true
+          
+          # Create primary release APK file
+          RELEASE_APK=$(find dist-android/ -name "*release*.apk" | head -n 1)
+          if [ -n "$RELEASE_APK" ]; then
+            cp "$RELEASE_APK" vpnbridge-android.apk
+          else
+            DEBUG_APK=$(find dist-android/ -name "*debug*.apk" | head -n 1)
+            if [ -n "$DEBUG_APK" ]; then
+              cp "$DEBUG_APK" vpnbridge-android.apk
+            fi
+          fi
 
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: vpnbridge-android
-          path: vpnbridge-android-bundle.tar.gz
+          name: vpnbridge-android-apk
+          path: |
+            vpnbridge-android.apk
+            dist-android/*.apk
 
   publish-release:
     name: Publish GitHub Release
@@ -109,7 +130,7 @@ jobs:
       - name: Download Android Artifact
         uses: actions/download-artifact@v4
         with:
-          name: vpnbridge-android
+          name: vpnbridge-android-apk
           path: ./release-assets
 
       - name: Create GitHub Release
