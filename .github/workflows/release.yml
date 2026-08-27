@@ -142,5 +142,4 @@ jobs:
           gh release delete "$TAG_NAME" -y || true
           gh release create "$TAG_NAME" ./release-assets/* \
             --title "VPNBridge $TAG_NAME" \
-            --generate-notes \
-            --clobber
+            --generate-notes
