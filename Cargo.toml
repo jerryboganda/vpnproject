@@ -9,6 +9,8 @@ members = [
     "crates/windows-tun",
     "crates/windows-routing",
     "crates/test-support",
+    "apps/windows/src-tauri",
+    "apps/android/src-tauri",
     "tools/echo-server",
     "tools/dns-test-server",
     "tools/traffic-generator",
@@ -37,6 +39,7 @@ tokio = { version = "1.38", features = ["full"] }
 tokio-util = { version = "0.7", features = ["codec", "net", "io"] }
 bytes = "1.6"
 socket2 = { version = "0.5", features = ["all"] }
+libc = "0.2"
 
 # Serialization & Protocols
 serde = { version = "1.0", features = ["derive"] }

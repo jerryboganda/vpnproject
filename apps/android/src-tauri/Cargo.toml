@@ -7,7 +7,14 @@ license = "MIT OR Apache-2.0"
 
 [lib]
 name = "vpnbridge_android_lib"
-crate-type = ["staticlib", "cdylib", "rlib"]
+crate-type = ["rlib"]
+path = "src/lib.rs"
+test = false
+
+[[bin]]
+name = "vpnbridge-android-app"
+path = "src/main.rs"
+test = false
 
 [dependencies]
 vpnbridge-core = { path = "../../../crates/core" }
@@ -23,3 +30,6 @@ serde_json = "1.0"
 tokio = { version = "1.38", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = "0.3"
+
+[build-dependencies]
+tauri-build = { version = "2.1", features = [] }
