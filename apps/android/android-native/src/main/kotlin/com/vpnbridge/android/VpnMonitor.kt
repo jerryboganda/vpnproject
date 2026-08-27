@@ -5,16 +5,15 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import android.os.Build
 import android.util.Log
 
 /**
  * Monitors Android network changes and identifies the active TRANSPORT_VPN network handle.
- * Invokes native callbacks to trigger generation advancement or fail-closed invalidation.
+ * Invokes callbacks to update the SOCKS5 gateway with the validated VPN Network.
  */
 class VpnMonitor(
     private val context: Context,
-    private val onVpnValidated: (networkHandle: Long, dnsServers: List<String>) -> Unit,
+    private val onVpnValidated: (network: Network, networkHandle: Long, dnsServers: List<String>) -> Unit,
     private val onVpnLost: () -> Unit
 ) {
     companion object {
@@ -24,7 +23,8 @@ class VpnMonitor(
     private val connectivityManager =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    private var activeVpnNetwork: Network? = null
+    var activeVpnNetwork: Network? = null
+        private set
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
@@ -38,7 +38,7 @@ class VpnMonitor(
                 val dnsServers = linkProperties?.dnsServers?.map { it.hostAddress ?: "" }?.filter { it.isNotEmpty() }
                     ?: emptyList()
 
-                onVpnValidated(handle, dnsServers)
+                onVpnValidated(network, handle, dnsServers)
             }
         }
 
@@ -46,10 +46,11 @@ class VpnMonitor(
             if (caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
                 val handle = network.networkHandle
                 Log.d(TAG, "VPN capabilities updated for network handle: $handle")
+                activeVpnNetwork = network
                 val linkProperties = connectivityManager.getLinkProperties(network)
                 val dnsServers = linkProperties?.dnsServers?.map { it.hostAddress ?: "" }?.filter { it.isNotEmpty() }
                     ?: emptyList()
-                onVpnValidated(handle, dnsServers)
+                onVpnValidated(network, handle, dnsServers)
             } else if (activeVpnNetwork == network) {
                 Log.w(TAG, "Network lost TRANSPORT_VPN capability; failing closed")
                 activeVpnNetwork = null
@@ -67,6 +68,25 @@ class VpnMonitor(
     }
 
     fun startMonitoring() {
+        // First, check if there's already an active VPN network
+        try {
+            val allNetworks = connectivityManager.allNetworks
+            for (net in allNetworks) {
+                val caps = connectivityManager.getNetworkCapabilities(net)
+                if (caps != null && caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
+                    val handle = net.networkHandle
+                    Log.i(TAG, "Initial active VPN network detected: $handle")
+                    activeVpnNetwork = net
+                    val linkProps = connectivityManager.getLinkProperties(net)
+                    val dns = linkProps?.dnsServers?.map { it.hostAddress ?: "" }?.filter { it.isNotEmpty() } ?: emptyList()
+                    onVpnValidated(net, handle, dns)
+                    break
+                }
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not check initial active networks", e)
+        }
+
         val request = NetworkRequest.Builder()
             .addTransportType(NetworkCapabilities.TRANSPORT_VPN)
             .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)

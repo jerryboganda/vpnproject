@@ -13,8 +13,8 @@ import android.os.IBinder
 import android.util.Log
 
 /**
- * Foreground service managing the Local-Only Hotspot reservation and VPN network monitoring.
- * Uses FOREGROUND_SERVICE_CONNECTED_DEVICE type on modern Android targets (Android 14/15).
+ * Foreground service managing the Local-Only Hotspot reservation, SOCKS5 Gateway server,
+ * and VPN network monitoring.
  */
 class HotspotService : Service() {
     companion object {
@@ -32,6 +32,7 @@ class HotspotService : Service() {
 
     private var hotspotReservation: WifiManager.LocalOnlyHotspotReservation? = null
     private var vpnMonitor: VpnMonitor? = null
+    private var socks5Gateway: Socks5Gateway? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -61,19 +62,26 @@ class HotspotService : Service() {
             startForeground(NOTIFICATION_ID, notification)
         }
 
-        // Initialize VPN monitor
+        // 1. Initialize SOCKS5 Gateway Server on port 10808
+        val gateway = Socks5Gateway(port = 10808, authToken = "vpnbridge-secret-key", requireAuth = false)
+        socks5Gateway = gateway
+        gateway.start()
+
+        // 2. Initialize VPN monitor and bridge active VPN network to SOCKS5 gateway
         vpnMonitor = VpnMonitor(
             context = applicationContext,
-            onVpnValidated = { handle, dnsServers ->
-                Log.i(TAG, "VPN Validated with handle $handle; forwarding to Rust core")
+            onVpnValidated = { network, handle, dnsServers ->
+                Log.i(TAG, "VPN Validated ($handle); binding gateway upstream to VPN network")
+                socks5Gateway?.activeVpnNetwork = network
             },
             onVpnLost = {
-                Log.w(TAG, "VPN Lost; triggering Rust core fail-closed")
+                Log.w(TAG, "VPN Lost; triggering SOCKS5 gateway fail-closed")
+                socks5Gateway?.activeVpnNetwork = null
             }
         )
         vpnMonitor?.startMonitoring()
 
-        // Start Local-Only Hotspot reservation
+        // 3. Start Local-Only Hotspot reservation
         val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         try {
             wifiManager.startLocalOnlyHotspot(object : WifiManager.LocalOnlyHotspotCallback() {
@@ -138,6 +146,9 @@ class HotspotService : Service() {
     private fun stopGatewayService() {
         vpnMonitor?.stopMonitoring()
         vpnMonitor = null
+
+        socks5Gateway?.stop()
+        socks5Gateway = null
 
         try {
             hotspotReservation?.close()

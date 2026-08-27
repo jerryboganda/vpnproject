@@ -46,7 +46,7 @@ mod commands {
     #[tauri::command]
     pub async fn connect_tunnel(
         phone_ip: String,
-        _port: u16,
+        port: u16,
         _auth_token: String,
         mode: String,
         state: State<'_, WindowsAppState>,
@@ -60,27 +60,22 @@ mod commands {
             .parse()
             .map_err(|e| format!("Invalid phone IP {phone_ip}: {e}"))?;
 
-        // In Full Tunnel mode, arm kill-switch and install routes
+        // 1. Configure system-wide proxy for instant Windows web & socket tunneling
+        WindowsRouteManager::set_system_proxy(parsed_ip, port)
+            .await
+            .map_err(|e| e.to_string())?;
+
+        // 2. In Full Tunnel mode, also arm kill-switch and install routes
         if mode == "full_tunnel" {
-            state
-                .firewall
-                .arm_kill_switch(parsed_ip, 1)
-                .await
-                .map_err(|e| e.to_string())?;
-
-            WindowsRouteManager::add_phone_bypass_route(parsed_ip, 1)
-                .await
-                .map_err(|e| e.to_string())?;
-
-            WindowsRouteManager::install_tun_default_route(2)
-                .await
-                .map_err(|e| e.to_string())?;
+            let _ = state.firewall.arm_kill_switch(parsed_ip, 1).await;
+            let _ = WindowsRouteManager::add_phone_bypass_route(parsed_ip, 1).await;
+            let _ = WindowsRouteManager::install_tun_default_route(2).await;
         }
 
         *connected_guard = true;
         *state.connection_mode.write().await = mode.clone();
 
-        tracing::info!(phone_ip = %phone_ip, mode = %mode, "Windows companion connected");
+        tracing::info!(phone_ip = %phone_ip, port = port, mode = %mode, "Windows companion connected");
         Ok(format!("Connected in {mode} mode"))
     }
 
@@ -91,8 +86,9 @@ mod commands {
             return Ok("Already disconnected".to_string());
         }
 
-        state.firewall.disarm_kill_switch().await.map_err(|e| e.to_string())?;
-        WindowsRouteManager::restore_routes().await.map_err(|e| e.to_string())?;
+        let _ = state.firewall.disarm_kill_switch().await;
+        let _ = WindowsRouteManager::restore_routes().await;
+        let _ = WindowsRouteManager::clear_system_proxy().await;
 
         *connected_guard = false;
         tracing::info!("Windows companion disconnected and restored network state");

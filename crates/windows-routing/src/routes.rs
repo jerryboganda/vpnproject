@@ -5,6 +5,62 @@ use vpnbridge_core::error::Result;
 pub struct WindowsRouteManager;
 
 impl WindowsRouteManager {
+    /// Configure Windows system-wide SOCKS5 proxy via registry.
+    pub async fn set_system_proxy(phone_ip: IpAddr, port: u16) -> Result<()> {
+        let proxy_str = format!("socks={phone_ip}:{port}");
+        tracing::info!(proxy = %proxy_str, "Configuring Windows System SOCKS5 Proxy");
+
+        let _ = Command::new("reg")
+            .args([
+                "add",
+                r"HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
+                "/v",
+                "ProxyServer",
+                "/t",
+                "REG_SZ",
+                "/d",
+                &proxy_str,
+                "/f",
+            ])
+            .status();
+
+        let _ = Command::new("reg")
+            .args([
+                "add",
+                r"HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
+                "/v",
+                "ProxyEnable",
+                "/t",
+                "REG_DWORD",
+                "/d",
+                "1",
+                "/f",
+            ])
+            .status();
+
+        Ok(())
+    }
+
+    /// Disable Windows system-wide proxy.
+    pub async fn clear_system_proxy() -> Result<()> {
+        tracing::info!("Disabling Windows System Proxy");
+        let _ = Command::new("reg")
+            .args([
+                "add",
+                r"HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
+                "/v",
+                "ProxyEnable",
+                "/t",
+                "REG_DWORD",
+                "/d",
+                "0",
+                "/f",
+            ])
+            .status();
+
+        Ok(())
+    }
+
     /// Add explicit host route for the Phone Hotspot Gateway endpoint so SOCKS/control bypasses TUN.
     pub async fn add_phone_bypass_route(
         phone_ip: IpAddr,
@@ -89,6 +145,8 @@ impl WindowsRouteManager {
         let _ = Command::new("route")
             .args(["delete", "0.0.0.0", "mask", "0.0.0.0", "10.0.0.1"])
             .status();
+
+        let _ = Self::clear_system_proxy().await;
 
         Ok(())
     }
