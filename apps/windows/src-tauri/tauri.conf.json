@@ -4,18 +4,15 @@
   "version": "0.1.0",
   "identifier": "com.vpnbridge.windows",
   "build": {
-    "frontendDist": "../dist",
-    "devUrl": "http://localhost:5173",
-    "beforeDevCommand": "pnpm dev",
-    "beforeBuildCommand": "pnpm build"
+    "frontendDist": "../dist"
   },
   "app": {
-    "withGlobalTauri": false,
+    "withGlobalTauri": true,
     "windows": [
       {
         "title": "VPNBridge Companion",
-        "width": 800,
-        "height": 600,
+        "width": 640,
+        "height": 720,
         "resizable": true
       }
     ],

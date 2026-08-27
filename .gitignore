@@ -6,6 +6,8 @@ Cargo.lock
 # Node.js / Frontends
 node_modules/
 dist/
+!apps/windows/dist/
+!apps/android/dist/
 .svelte-kit/
 .vite/
 npm-debug.log*

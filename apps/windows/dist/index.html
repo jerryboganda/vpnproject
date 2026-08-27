@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VPNBridge Companion</title>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+    .container {
+      width: 100%;
+      max-width: 580px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: #fff;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+    nav {
+      display: flex;
+      gap: 0.5rem;
+      background: #0f172a;
+      padding: 0.35rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--card-border);
+    }
+    .nav-btn {
+      flex: 1;
+      padding: 0.6rem 0.5rem;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .nav-btn.active {
+      background: var(--card-bg);
+      color: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      padding: 1.25rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+    .badge-disconnected { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .badge-protected { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-text {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border-radius: 0.65rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.99); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+    .stat-box {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 0.65rem;
+      padding: 0.75rem;
+    }
+    .stat-label { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+    .stat-val { font-size: 1.15rem; font-weight: 700; margin-top: 0.2rem; color: #fff; }
+    label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.3rem; }
+    input, select {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 0.5rem;
+      color: #fff;
+      font-size: 0.85rem;
+      margin-bottom: 0.85rem;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--primary); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>VPNBridge Companion</h1>
+      <p class="subtitle">Windows Full Tunnel & WFP Kill Switch Client</p>
+    </header>
+
+    <nav>
+      <button class="nav-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+      <button class="nav-btn" onclick="switchTab('pair')">Pair from Phone</button>
+      <button class="nav-btn" onclick="switchTab('settings')">Settings</button>
+    </nav>
+
+    <!-- Dashboard Tab -->
+    <div id="tab-dashboard" class="tab-content active">
+      <div class="card" style="text-align: center; margin-bottom: 1rem;">
+        <div id="status-badge" class="badge badge-disconnected">DISCONNECTED</div>
+        <div id="status-desc" class="status-text">Ready to connect to Android VPN gateway</div>
+        <button id="btn-toggle" class="btn btn-primary" onclick="toggleConnection()">Connect Protected Tunnel</button>
+      </div>
+
+      <div class="card">
+        <h2 style="font-size: 0.95rem; font-weight: 700;">Tunnel Telemetry</h2>
+        <div class="grid-2">
+          <div class="stat-box">
+            <div class="stat-label">Download</div>
+            <div id="stat-rx" class="stat-val" style="color: #34d399;">0 B</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Upload</div>
+            <div id="stat-tx" class="stat-val" style="color: #38bdf8;">0 B</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Active TCP Streams</div>
+            <div id="stat-tcp" class="stat-val">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">WFP Kill Switch</div>
+            <div id="stat-ks" class="stat-val" style="color: var(--text-muted);">STANDBY</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pair Tab -->
+    <div id="tab-pair" class="tab-content">
+      <div class="card">
+        <h2 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;">Import Pairing URI</h2>
+        <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;">
+          Paste the URI generated from the Android Gateway app to automatically configure connection endpoints.
+        </p>
+        <label>Pairing URI</label>
+        <input type="text" id="pairing-uri" placeholder="vpnbridge://pair?host=192.168.43.1&port=10808&token=..." />
+        <div id="pairing-msg" style="font-size: 0.8rem; margin-bottom: 0.75rem; display: none;"></div>
+        <button class="btn btn-primary" onclick="importPairingUri()">Import Configuration</button>
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div id="tab-settings" class="tab-content">
+      <div class="card">
+        <h2 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Connection Settings</h2>
+        
+        <label>Tunnel Mode</label>
+        <select id="setting-mode">
+          <option value="full_tunnel">Full Tunnel (Wintun + WFP Kill Switch)</option>
+          <option value="proxy">Proxy Mode (SOCKS5 Direct)</option>
+        </select>
+
+        <label>Phone Gateway IP</label>
+        <input type="text" id="setting-ip" value="192.168.43.1" />
+
+        <label>SOCKS5 Port</label>
+        <input type="number" id="setting-port" value="10808" />
+
+        <label>Authentication Token</label>
+        <input type="password" id="setting-token" value="vpnbridge-secret-key" />
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let isConnected = false;
+    let isConnecting = false;
+
+    function getTauriInvoke() {
+      if (window.__TAURI_INTERNALS__ && window.__TAURI_INTERNALS__.invoke) {
+        return window.__TAURI_INTERNALS__.invoke;
+      }
+      if (window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke) {
+        return window.__TAURI__.core.invoke;
+      }
+      return null;
+    }
+
+    async function tauriCall(cmd, args = {}) {
+      const inv = getTauriInvoke();
+      if (inv) {
+        return await inv(cmd, args);
+      }
+      console.warn("Tauri bridge not detected, using mock state");
+      return null;
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+      document.querySelectorAll(".nav-btn").forEach(el => el.classList.remove("active"));
+      document.getElementById("tab-" + tab).classList.add("active");
+      event.target.classList.add("active");
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes || bytes === 0) return "0 B";
+      const k = 1024;
+      const sizes = ["B", "KB", "MB", "GB"];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    }
+
+    async function updateStatus() {
+      try {
+        const res = await tauriCall("get_status");
+        if (res) {
+          isConnected = res.is_connected;
+          const badge = document.getElementById("status-badge");
+          const desc = document.getElementById("status-desc");
+          const btn = document.getElementById("btn-toggle");
+          const ks = document.getElementById("stat-ks");
+
+          if (isConnected) {
+            badge.className = "badge badge-protected";
+            badge.innerText = "PROTECTED & TUNNELED";
+            desc.innerText = res.status_text || "All Windows traffic routed through phone VPN";
+            btn.className = "btn btn-danger";
+            btn.innerText = "Disconnect";
+            ks.innerText = res.is_kill_switch_armed ? "ARMED" : "ACTIVE";
+            ks.style.color = "#10b981";
+          } else {
+            badge.className = "badge badge-disconnected";
+            badge.innerText = "DISCONNECTED";
+            desc.innerText = res.status_text || "Ready to connect to Android VPN gateway";
+            btn.className = "btn btn-primary";
+            btn.innerText = "Connect Protected Tunnel";
+            ks.innerText = "STANDBY";
+            ks.style.color = "#94a3b8";
+          }
+        }
+
+        const metrics = await tauriCall("get_metrics");
+        if (metrics) {
+          document.getElementById("stat-rx").innerText = formatBytes(metrics.bytes_rx);
+          document.getElementById("stat-tx").innerText = formatBytes(metrics.bytes_tx);
+          document.getElementById("stat-tcp").innerText = metrics.active_tcp_streams || 0;
+        }
+      } catch (e) {
+        console.error("Telemetry error:", e);
+      }
+    }
+
+    async function toggleConnection() {
+      if (isConnecting) return;
+      const btn = document.getElementById("btn-toggle");
+      btn.innerText = "Processing...";
+      isConnecting = true;
+
+      try {
+        if (isConnected) {
+          await tauriCall("disconnect_tunnel");
+        } else {
+          const phoneIp = document.getElementById("setting-ip").value;
+          const port = parseInt(document.getElementById("setting-port").value, 10);
+          const authToken = document.getElementById("setting-token").value;
+          const mode = document.getElementById("setting-mode").value;
+
+          await tauriCall("connect_tunnel", { phoneIp, port, authToken, mode });
+        }
+        await updateStatus();
+      } catch (e) {
+        alert("Connection error: " + e);
+      } finally {
+        isConnecting = false;
+        await updateStatus();
+      }
+    }
+
+    function importPairingUri() {
+      const uri = document.getElementById("pairing-uri").value.trim();
+      const msg = document.getElementById("pairing-msg");
+      if (!uri.startsWith("vpnbridge://pair?")) {
+        msg.style.display = "block";
+        msg.style.color = "#ef4444";
+        msg.innerText = "Invalid pairing URI format. Must start with vpnbridge://pair?";
+        return;
+      }
+      try {
+        const url = new URL(uri.replace("vpnbridge://pair?", "http://localhost/?"));
+        const host = url.searchParams.get("host") || url.searchParams.get("gw");
+        const port = url.searchParams.get("port");
+        const token = url.searchParams.get("token");
+
+        if (host) document.getElementById("setting-ip").value = host;
+        if (port) document.getElementById("setting-port").value = port;
+        if (token) document.getElementById("setting-token").value = token;
+
+        msg.style.display = "block";
+        msg.style.color = "#10b981";
+        msg.innerText = "Pairing parameters successfully imported!";
+      } catch (e) {
+        msg.style.display = "block";
+        msg.style.color = "#ef4444";
+        msg.innerText = "Failed to parse URI: " + e;
+      }
+    }
+
+    setInterval(updateStatus, 1000);
+    updateStatus();
+  </script>
+</body>
+</html>
