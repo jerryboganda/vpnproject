@@ -133,16 +133,14 @@ jobs:
           name: vpnbridge-android-apk
           path: ./release-assets
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
-        with:
-          tag_name: ${{ github.event.inputs.version || github.ref_name }}
-          name: VPNBridge ${{ github.event.inputs.version || github.ref_name }}
-          draft: false
-          prerelease: false
-          generate_release_notes: true
-          files: |
-            ./release-assets/*
+      - name: Publish Release with GitHub CLI
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ github.event.inputs.version || github.ref_name }}
+        run: |
+          echo "Publishing release $TAG_NAME..."
+          gh release delete "$TAG_NAME" -y || true
+          gh release create "$TAG_NAME" ./release-assets/* \
+            --title "VPNBridge $TAG_NAME" \
+            --generate-notes \
+            --clobber
