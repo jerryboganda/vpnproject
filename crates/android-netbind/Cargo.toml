@@ -1,0 +1,17 @@
+[package]
+name = "vpnbridge-android-netbind"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+vpnbridge-core = { workspace = true }
+socket2 = { workspace = true }
+tokio = { workspace = true, features = ["net", "sync", "io-util"] }
+async-trait = { workspace = true }
+tracing = { workspace = true }
+thiserror = { workspace = true }
+
+[target.'cfg(target_os = "android")'.dependencies]
+# android specific dependencies if needed

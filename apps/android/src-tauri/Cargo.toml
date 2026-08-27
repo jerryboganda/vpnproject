@@ -1,0 +1,25 @@
+[package]
+name = "vpnbridge-android-app"
+version = "0.1.0"
+edition = "2021"
+authors = ["VPNBridge Team"]
+license = "MIT OR Apache-2.0"
+
+[lib]
+name = "vpnbridge_android_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[dependencies]
+vpnbridge-core = { path = "../../../crates/core" }
+vpnbridge-gateway = { path = "../../../crates/gateway" }
+vpnbridge-protocol = { path = "../../../crates/protocol" }
+vpnbridge-metrics = { path = "../../../crates/metrics" }
+vpnbridge-android-netbind = { path = "../../../crates/android-netbind" }
+
+tauri = { version = "2.1", features = [] }
+tauri-plugin-shell = "2.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.38", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"

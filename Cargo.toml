@@ -1,0 +1,66 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/core",
+    "crates/protocol",
+    "crates/metrics",
+    "crates/android-netbind",
+    "crates/gateway",
+    "crates/windows-tun",
+    "crates/windows-routing",
+    "crates/test-support",
+    "tools/echo-server",
+    "tools/dns-test-server",
+    "tools/traffic-generator",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["VPNBridge Team"]
+license = "MIT OR Apache-2.0"
+rust-version = "1.75"
+
+[workspace.dependencies]
+# Workspace crates
+vpnbridge-core = { path = "crates/core" }
+vpnbridge-protocol = { path = "crates/protocol" }
+vpnbridge-metrics = { path = "crates/metrics" }
+vpnbridge-android-netbind = { path = "crates/android-netbind" }
+vpnbridge-gateway = { path = "crates/gateway" }
+vpnbridge-windows-tun = { path = "crates/windows-tun" }
+vpnbridge-windows-routing = { path = "crates/windows-routing" }
+vpnbridge-test-support = { path = "crates/test-support" }
+
+# Async & Networking
+tokio = { version = "1.38", features = ["full"] }
+tokio-util = { version = "0.7", features = ["codec", "net", "io"] }
+bytes = "1.6"
+socket2 = { version = "0.5", features = ["all"] }
+
+# Serialization & Protocols
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Cryptography & Security
+sha2 = "0.10"
+hmac = "0.12"
+subtle = "2.5"
+rand = "0.8"
+
+# Observability
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+thiserror = "1.0"
+async-trait = "0.1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.dev]
+opt-level = 0
+debug = true

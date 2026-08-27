@@ -1,0 +1,42 @@
+# Rust build artifacts
+target/
+**/*.rs.bk
+Cargo.lock
+
+# Node.js / Frontends
+node_modules/
+dist/
+.svelte-kit/
+.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Android build artifacts
+.gradle/
+build/
+**/build/
+*.apk
+*.aab
+local.properties
+.cxx/
+**/android-native/build/
+
+# Tauri build artifacts
+src-tauri/target/
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# OS / Environment
+.env
+.env.local
+*.log

@@ -1,0 +1,19 @@
+{
+  "name": "vpnbridge-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "VPNBridge No-Root Android to Windows VPN Sharing System",
+  "scripts": {
+    "dev:android": "pnpm --filter @vpnbridge/android tauri android dev",
+    "build:android": "pnpm --filter @vpnbridge/android tauri android build",
+    "dev:windows": "pnpm --filter @vpnbridge/windows tauri dev",
+    "build:windows": "pnpm --filter @vpnbridge/windows tauri build",
+    "test:rust": "cargo test --workspace",
+    "clippy": "cargo clippy --workspace --all-targets -- -D warnings",
+    "fmt": "cargo fmt --all --check"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.1.0"
+  },
+  "packageManager": "pnpm@10.33.3"
+}
