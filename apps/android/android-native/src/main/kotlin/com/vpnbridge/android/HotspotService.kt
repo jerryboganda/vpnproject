@@ -23,6 +23,11 @@ class HotspotService : Service() {
         private const val CHANNEL_ID = "vpnbridge_service_channel"
         const val ACTION_START = "com.vpnbridge.START"
         const val ACTION_STOP = "com.vpnbridge.STOP"
+
+        var onHotspotStarted: ((ssid: String, pass: String) -> Unit)? = null
+        var onHotspotFailed: ((reason: String) -> Unit)? = null
+        var currentSsid: String? = null
+        var currentPass: String? = null
     }
 
     private var hotspotReservation: WifiManager.LocalOnlyHotspotReservation? = null
@@ -61,11 +66,9 @@ class HotspotService : Service() {
             context = applicationContext,
             onVpnValidated = { handle, dnsServers ->
                 Log.i(TAG, "VPN Validated with handle $handle; forwarding to Rust core")
-                // Call native JNI / Tauri update_vpn_state(true, handle, dnsServers)
             },
             onVpnLost = {
                 Log.w(TAG, "VPN Lost; triggering Rust core fail-closed")
-                // Call native JNI / Tauri update_vpn_state(false, 0, emptyList)
             }
         )
         vpnMonitor?.startMonitoring()
@@ -77,23 +80,58 @@ class HotspotService : Service() {
                 override fun onStarted(reservation: WifiManager.LocalOnlyHotspotReservation) {
                     super.onStarted(reservation)
                     hotspotReservation = reservation
-                    val config = reservation.wifiConfiguration
-                    Log.i(TAG, "Local-Only Hotspot started: SSID=${config?.SSID}")
+                    
+                    var ssid = "AndroidAP_VPNBridge"
+                    var pass = "None (Open or Check Hotspot Settings)"
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        try {
+                            val config = reservation.softApConfiguration
+                            ssid = config.ssid ?: ssid
+                            pass = config.passphrase ?: "Open"
+                        } catch (e: Throwable) {
+                            Log.w(TAG, "Could not extract SoftApConfiguration: ${e.message}")
+                        }
+                    } else {
+                        @Suppress("DEPRECATION")
+                        val config = reservation.wifiConfiguration
+                        ssid = config?.SSID ?: ssid
+                        pass = config?.preSharedKey ?: "Open"
+                    }
+
+                    currentSsid = ssid
+                    currentPass = pass
+                    Log.i(TAG, "Local-Only Hotspot started: SSID=$ssid, Password=$pass")
+                    onHotspotStarted?.invoke(ssid, pass)
                 }
 
                 override fun onStopped() {
                     super.onStopped()
                     Log.w(TAG, "Local-Only Hotspot stopped")
                     hotspotReservation = null
+                    currentSsid = null
+                    currentPass = null
                 }
 
                 override fun onFailed(reason: Int) {
                     super.onFailed(reason)
-                    Log.e(TAG, "Local-Only Hotspot failed with reason: $reason")
+                    val reasonStr = when (reason) {
+                        1 -> "ERROR_NO_CHANNEL (Check if Location is enabled)"
+                        2 -> "ERROR_GENERIC (Hotspot already active or restricted)"
+                        3 -> "ERROR_INCOMPATIBLE_MODE"
+                        4 -> "ERROR_TETHERING_DISALLOWED"
+                        else -> "Reason code $reason"
+                    }
+                    Log.e(TAG, "Local-Only Hotspot failed: $reasonStr")
+                    onHotspotFailed?.invoke(reasonStr)
                 }
             }, null)
         } catch (e: SecurityException) {
             Log.e(TAG, "Missing permissions to start Local-Only Hotspot", e)
+            onHotspotFailed?.invoke("Permission error: ${e.localizedMessage}")
+        } catch (e: Throwable) {
+            Log.e(TAG, "Unexpected error starting hotspot", e)
+            onHotspotFailed?.invoke("Error: ${e.localizedMessage}")
         }
     }
 
@@ -101,8 +139,14 @@ class HotspotService : Service() {
         vpnMonitor?.stopMonitoring()
         vpnMonitor = null
 
-        hotspotReservation?.close()
+        try {
+            hotspotReservation?.close()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error closing hotspot reservation", e)
+        }
         hotspotReservation = null
+        currentSsid = null
+        currentPass = null
 
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()

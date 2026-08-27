@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="24dp">
+        android:padding="20dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -19,81 +19,137 @@
             android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="#f8fafc"
-            android:layout_marginBottom="6dp" />
+            android:layout_marginBottom="4dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="No-Root Fail-Closed VPN Hotspot"
-            android:textSize="14sp"
+            android:text="No-Root Fail-Closed VPN Gateway"
+            android:textSize="13sp"
             android:textColor="#94a3b8"
-            android:layout_marginBottom="28dp" />
+            android:layout_marginBottom="20dp" />
 
         <TextView
             android:id="@+id/tvStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Status: Gateway Idle"
-            android:textSize="18sp"
+            android:textSize="17sp"
             android:textColor="#34d399"
             android:textStyle="bold"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="16dp" />
 
         <Button
             android:id="@+id/btnToggle"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="54dp"
             android:text="Share VPN Connection"
             android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="#ffffff"
             android:backgroundTint="#3b82f6"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="20dp" />
 
+        <!-- Hotspot Details Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="#1e293b"
-            android:padding="16dp"
-            android:layout_marginBottom="16dp">
+            android:padding="14dp"
+            android:layout_marginBottom="14dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Connection Endpoints"
+                android:text="Option 1: Direct Hotspot Connection"
                 android:textStyle="bold"
+                android:textColor="#38bdf8"
+                android:textSize="14sp"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/tvHotspotSsid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Wi-Fi Name: (Starting Hotspot...)"
                 android:textColor="#f8fafc"
-                android:textSize="15sp"
+                android:textSize="13sp"
+                android:fontFamily="monospace"
+                android:layout_marginBottom="3dp" />
+
+            <TextView
+                android:id="@+id/tvHotspotPass"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Password: (Starting Hotspot...)"
+                android:textColor="#f8fafc"
+                android:textSize="13sp"
+                android:fontFamily="monospace"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="* Tip: Turn ON Phone Location/GPS if hotspot does not broadcast."
+                android:textColor="#94a3b8"
+                android:textSize="11sp"
                 android:layout_marginBottom="8dp" />
 
             <TextView
                 android:id="@+id/tvHotspotIp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="SOCKS5 Gateway: 192.168.43.1:10808"
-                android:textColor="#94a3b8"
+                android:text="Gateway IP: 192.168.43.1 : 10808"
+                android:textColor="#34d399"
                 android:textSize="13sp"
                 android:fontFamily="monospace"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:id="@+id/tvAuthToken"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Auth Token: vpnbridge-secret-key"
-                android:textColor="#94a3b8"
-                android:textSize="13sp"
-                android:fontFamily="monospace"
-                android:layout_marginBottom="12dp" />
+                android:layout_marginBottom="8dp" />
 
             <Button
-                android:id="@+id/btnCopyPairing"
+                android:id="@+id/btnCopyHotspotPairing"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:text="Copy Pairing Code for PC"
+                android:layout_height="44dp"
+                android:text="Copy Hotspot Pairing Code"
                 android:textColor="#ffffff"
                 android:backgroundTint="#0284c7" />
+
+        </LinearLayout>
+
+        <!-- LAN / Home Wi-Fi Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#1e293b"
+            android:padding="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Option 2: Same Local Wi-Fi Network"
+                android:textStyle="bold"
+                android:textColor="#a855f7"
+                android:textSize="14sp"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/tvLanIp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Phone Wi-Fi IP: Detecting..."
+                android:textColor="#f8fafc"
+                android:textSize="13sp"
+                android:fontFamily="monospace"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/btnCopyLanPairing"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:text="Copy Local Wi-Fi Pairing Code"
+                android:textColor="#ffffff"
+                android:backgroundTint="#7c3aed" />
 
         </LinearLayout>
 
