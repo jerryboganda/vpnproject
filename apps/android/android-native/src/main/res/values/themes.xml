@@ -1,0 +1,15 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.VPNBridge" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">#3b82f6</item>
+        <item name="colorPrimaryVariant">#1d4ed8</item>
+        <item name="colorOnPrimary">#ffffff</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">#34d399</item>
+        <item name="colorSecondaryVariant">#059669</item>
+        <item name="colorOnSecondary">#000000</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">#0f172a</item>
+        <item name="android:windowBackground">#0f172a</item>
+    </style>
+</resources>

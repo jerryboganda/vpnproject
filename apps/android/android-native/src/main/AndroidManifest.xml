@@ -23,7 +23,7 @@
         android:label="VPNBridge Gateway"
         android:roundIcon="@drawable/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.Material.Light.NoActionBar">
+        android:theme="@style/Theme.VPNBridge">
 
         <activity
             android:name=".MainActivity"

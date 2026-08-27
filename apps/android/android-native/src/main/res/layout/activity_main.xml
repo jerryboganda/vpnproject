@@ -1,47 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="24dp"
-    android:background="#0f172a">
+    android:background="#0f172a"
+    android:fillViewport="true">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="VPNBridge Gateway"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="#f8fafc"
-        android:layout_marginBottom="8dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="No-Root Fail-Closed VPN Hotspot"
-        android:textSize="14sp"
-        android:textColor="#94a3b8"
-        android:layout_marginBottom="32dp" />
-
-    <TextView
-        android:id="@+id/tvStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Status: Gateway Idle"
-        android:textSize="18sp"
-        android:textColor="#34d399"
-        android:textStyle="bold"
-        android:layout_marginBottom="24dp" />
-
-    <Button
-        android:id="@+id/btnToggle"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="Share VPN Connection"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="#ffffff"
-        android:backgroundTint="#3b82f6" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp">
 
-</LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="VPNBridge Gateway"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#f8fafc"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No-Root Fail-Closed VPN Hotspot"
+            android:textSize="14sp"
+            android:textColor="#94a3b8"
+            android:layout_marginBottom="28dp" />
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status: Gateway Idle"
+            android:textSize="18sp"
+            android:textColor="#34d399"
+            android:textStyle="bold"
+            android:layout_marginBottom="20dp" />
+
+        <Button
+            android:id="@+id/btnToggle"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Share VPN Connection"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#ffffff"
+            android:backgroundTint="#3b82f6"
+            android:layout_marginBottom="24dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#1e293b"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Connection Endpoints"
+                android:textStyle="bold"
+                android:textColor="#f8fafc"
+                android:textSize="15sp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvHotspotIp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SOCKS5 Gateway: 192.168.43.1:10808"
+                android:textColor="#94a3b8"
+                android:textSize="13sp"
+                android:fontFamily="monospace"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/tvAuthToken"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Auth Token: vpnbridge-secret-key"
+                android:textColor="#94a3b8"
+                android:textSize="13sp"
+                android:fontFamily="monospace"
+                android:layout_marginBottom="12dp" />
+
+            <Button
+                android:id="@+id/btnCopyPairing"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Copy Pairing Code for PC"
+                android:textColor="#ffffff"
+                android:backgroundTint="#0284c7" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
