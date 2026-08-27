@@ -109,9 +109,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vpnbridge-android-apk
-          path: |
-            vpnbridge-android.apk
-            dist-android/*.apk
+          path: vpnbridge-android.apk
 
   publish-release:
     name: Publish GitHub Release
@@ -140,6 +138,9 @@ jobs:
         run: |
           echo "Publishing release $TAG_NAME..."
           gh release delete "$TAG_NAME" -y || true
-          gh release create "$TAG_NAME" ./release-assets/* \
+          FILES=$(find ./release-assets -maxdepth 1 -type f)
+          echo "Found release files:"
+          echo "$FILES"
+          gh release create "$TAG_NAME" $FILES \
             --title "VPNBridge $TAG_NAME" \
             --generate-notes
